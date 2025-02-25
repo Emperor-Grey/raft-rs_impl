@@ -99,7 +99,7 @@ impl Node {
     }
 
     pub fn handle_message(&mut self, message: Message, from_peer: &Peer) -> Option<Message> {
-        info!("Handling message from {}: {:?}", from_peer.id, message);
+        info!("Handling message from {}: {:?}\n", from_peer.id, message);
         match message {
             Message::RequestVote {
                 term,

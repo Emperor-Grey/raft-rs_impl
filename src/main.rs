@@ -22,7 +22,7 @@ fn main() {
     .unwrap();
 
     // Define our cluster configuration
-    let node_configs = [(1, 5), (2, 3), (3, 6), (4, 4)];
+    let node_configs = [(1, 5), (2, 3), (3, 6), (4, 4), (5, 7), (6, 2), (7, 5)];
 
     // Create socket addresses for each node
     let node_addresses: Vec<SocketAddrV4> = node_configs
