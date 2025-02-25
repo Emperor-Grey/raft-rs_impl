@@ -1,9 +1,11 @@
+use crate::raft::storage::Storage;
 use crate::raft::types::{
     Leader, LogEntry, Message, NodeConfig, NodeState, Peer, Server, VoteResponse,
 };
-use log::info;
+use log::{error, info};
 use rand::Rng;
 use std::{
+    io,
     net::SocketAddrV4,
     time::{Duration, Instant},
 };
@@ -14,6 +16,7 @@ pub struct Node {
     pub config: NodeConfig,
     pub last_heartbeat: Option<Instant>,
     pub votes_received: u64,
+    pub storage: Storage,
 }
 
 impl Node {
@@ -34,12 +37,15 @@ impl Node {
             number_of_peers: peers.len(),
         };
 
+        let storage = Storage::new(config.id).expect("Failed to initialize storage");
+
         Self {
             server,
             peers,
             config,
             last_heartbeat: None,
             votes_received: 0,
+            storage,
         }
     }
 
@@ -242,6 +248,12 @@ impl Node {
 
             self.become_follower(Some(leader));
 
+            // for the node_id
+            self.append_log_entry(LogEntry::Heartbeat {
+                term: term,
+                peer_id: from_peer.id.clone(),
+            });
+
             // Add heartbeat to log entries
             self.server.log_entries.push(LogEntry::Heartbeat {
                 term,
@@ -255,4 +267,19 @@ impl Node {
         self.server.current_leader = leader;
         self.server.refresh_timeout();
     }
+
+    pub fn append_log_entry(&mut self, entry: LogEntry) -> io::Result<()> {
+        self.storage.append_entry(&entry)?;
+        self.server.log_entries.push(entry);
+        Ok(())
+    }
+
+    // pub fn append_to_log(&mut self, entry: LogEntry) {
+    //     self.server.log_entries.push(entry.clone());
+
+    //     // Write to persistent storage
+    //     if let Err(e) = self.storage.append_entry(&entry) {
+    //         error!("Failed to persist log entry: {}", e);
+    //     }
+    // }
 }
