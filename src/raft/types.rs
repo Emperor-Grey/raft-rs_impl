@@ -66,12 +66,12 @@ pub enum Message {
     RequestVoteResponse {
         term: u64,
         vote_granted: bool,
-        port: u16,
+        _port: u16,
     },
     Heartbeat {
         term: u64,
         leader_id: u64,
-        port: u16,
+        _port: u16,
     },
 }
 

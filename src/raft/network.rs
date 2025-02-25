@@ -148,8 +148,8 @@ fn handle_connection(mut stream: TcpStream, tx: Sender<(Message, Peer)>) {
                     // Extract port from the message itself
                     let port = match &message {
                         Message::RequestVote { port, .. } => *port,
-                        Message::RequestVoteResponse { port, .. } => *port,
-                        Message::Heartbeat { port, .. } => *port,
+                        Message::RequestVoteResponse { _port: port, .. } => *port,
+                        Message::Heartbeat { _port: port, .. } => *port,
                     };
                     // info!("The port that we get is {}", port);
 

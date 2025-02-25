@@ -1,15 +1,15 @@
 #![allow(unused)]
 
-use simplelog::{ColorChoice, Config, LevelFilter, TermLogger, TerminalMode};
 use std::net::{Ipv4Addr, SocketAddrV4};
 use std::thread;
 use std::time::{Duration, Instant};
 
-mod raft;
-
 use raft::network::Network;
 use raft::node::Node;
 use raft::types::{NodeConfig, Peer};
+use simplelog::{ColorChoice, Config, LevelFilter, TermLogger, TerminalMode};
+
+mod raft;
 
 fn main() {
     // Initialize logger

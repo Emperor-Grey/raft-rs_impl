@@ -2,7 +2,7 @@ use crate::raft::storage::Storage;
 use crate::raft::types::{
     Leader, LogEntry, Message, NodeConfig, NodeState, Peer, Server, VoteResponse,
 };
-use log::{error, info};
+use log::info;
 use rand::Rng;
 use std::{
     io,
@@ -89,7 +89,7 @@ impl Node {
                     messages.push(Message::Heartbeat {
                         term: self.server.term,
                         leader_id: self.config.id,
-                        port,
+                        _port: port,
                     });
                 }
             }
@@ -110,13 +110,13 @@ impl Node {
                 Some(Message::RequestVoteResponse {
                     term: self.server.term,
                     vote_granted: response.vote_granted,
-                    port: self.server.address.port(),
+                    _port: self.server.address.port(),
                 })
             }
             Message::RequestVoteResponse {
                 term,
                 vote_granted,
-                port,
+                _port: _,
             } => {
                 self.handle_vote_response(term, vote_granted, from_peer);
                 None
@@ -124,7 +124,7 @@ impl Node {
             Message::Heartbeat {
                 term,
                 leader_id,
-                port,
+                _port: _,
             } => {
                 self.handle_heartbeat(term, leader_id, from_peer);
                 None
@@ -249,7 +249,7 @@ impl Node {
             self.become_follower(Some(leader));
 
             // for the node_id
-            self.append_log_entry(LogEntry::Heartbeat {
+            let _ = self.append_log_entry(LogEntry::Heartbeat {
                 term: term,
                 peer_id: from_peer.id.clone(),
             });
