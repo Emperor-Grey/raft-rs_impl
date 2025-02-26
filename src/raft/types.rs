@@ -14,7 +14,15 @@ pub enum NodeState {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum LogEntry {
-    Heartbeat { term: u64, peer_id: String },
+    Heartbeat {
+        term: u64,
+        peer_id: String,
+    },
+    LeaderEntry {
+        term: u64,
+        peer_id: String,
+        leader: bool,
+    },
 }
 
 #[derive(Debug, Clone)]

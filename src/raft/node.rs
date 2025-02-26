@@ -2,6 +2,9 @@ use crate::raft::storage::Storage;
 use crate::raft::types::{
     Leader, LogEntry, Message, NodeConfig, NodeState, Peer, Server, VoteResponse,
 };
+use frost_ed25519::keys::PublicKeyPackage;
+use frost_ed25519::keys::SecretShare;
+use frost_ed25519::{self as frost, Error, Signature};
 use log::info;
 use rand::Rng;
 use std::{
@@ -17,6 +20,7 @@ pub struct Node {
     pub last_heartbeat: Option<Instant>,
     pub votes_received: u64,
     pub storage: Storage,
+    pub frost_key: Option<SecretShare>,
 }
 
 impl Node {
@@ -46,17 +50,18 @@ impl Node {
             last_heartbeat: None,
             votes_received: 0,
             storage,
+            frost_key: None,
         }
     }
 
     fn random_election_timeout(base_timeout: Duration) -> Duration {
-        let mut rng = rand::rng();
-        let random_ms = rng.random_range(300..800);
+        let mut rng = rand::thread_rng();
+        let random_ms = rng.gen_range(300..800);
         base_timeout + Duration::from_millis(random_ms)
     }
 
     pub fn start(&mut self) {
-        info!("Starting server at: {}..", self.server.address);
+        info!("Starting server at: {}", self.server.address);
         self.server.refresh_timeout();
         info!(
             "The server {}, has a timeout of {} seconds.",
@@ -88,9 +93,10 @@ impl Node {
                     self.last_heartbeat = Some(now);
 
                     // Log leader's heartbeat
-                    let _ = self.append_log_entry(LogEntry::Heartbeat {
+                    let _ = self.append_log_entry(LogEntry::LeaderEntry {
                         term: self.server.term,
                         peer_id: self.server.id.clone(),
+                        leader: true,
                     });
 
                     messages.push(Message::Heartbeat {
@@ -257,7 +263,7 @@ impl Node {
 
             // for the node_id
             let _ = self.append_log_entry(LogEntry::Heartbeat {
-                term: term,
+                term,
                 peer_id: from_peer.id.clone(),
             });
 
@@ -281,12 +287,60 @@ impl Node {
         Ok(())
     }
 
-    // pub fn append_to_log(&mut self, entry: LogEntry) {
-    //     self.server.log_entries.push(entry.clone());
+    // From here it's frost shit
+    pub fn set_frost_key(&mut self, secret_share: Option<SecretShare>) {
+        self.frost_key = secret_share.clone();
+        if secret_share.is_some() {
+            info!(
+                "FROST key set for node {} (server_{})",
+                self.config.id, self.server.id
+            );
+        }
+    }
 
-    //     // Write to persistent storage
-    //     if let Err(e) = self.storage.append_entry(&entry) {
-    //         error!("Failed to persist log entry: {}", e);
-    //     }
-    // }
+    pub fn verify_signature(
+        &self,
+        message: &[u8],
+        signature: &Signature,
+        pubkey_package: &PublicKeyPackage,
+    ) -> bool {
+        match pubkey_package.verifying_key().verify(message, signature) {
+            Ok(_) => {
+                info!(
+                    "Node {} successfully verified signature for message",
+                    self.server.id
+                );
+                true
+            }
+            Err(e) => {
+                info!("Node {} failed to verify signature: {}", self.server.id, e);
+                false
+            }
+        }
+    }
+
+    pub fn sign_message(
+        &self,
+        message: &[u8],
+        nonces: frost::round1::SigningNonces,
+        signing_package: &frost::SigningPackage,
+    ) -> Result<frost::round2::SignatureShare, frost::Error> {
+        if let Some(key_package) = self
+            .frost_key
+            .as_ref()
+            .map(|share| frost::keys::KeyPackage::try_from(share.clone()))
+        {
+            match key_package {
+                Ok(package) => frost::round2::sign(signing_package, &nonces, &package),
+                Err(e) => {
+                    info!("Failed to create key package: {}", e);
+                    Err(e)
+                }
+            }
+        } else {
+            info!("No FROST key available for signing");
+            info!("Invalid signature share");
+            Err(Error::InvalidSignature)
+        }
+    }
 }
