@@ -93,9 +93,10 @@ impl Node {
                     self.last_heartbeat = Some(now);
 
                     // Log leader's heartbeat
-                    let _ = self.append_log_entry(LogEntry::Heartbeat {
+                    let _ = self.append_log_entry(LogEntry::LeaderEntry {
                         term: self.server.term,
                         peer_id: self.server.id.clone(),
+                        leader: true,
                     });
 
                     messages.push(Message::Heartbeat {
