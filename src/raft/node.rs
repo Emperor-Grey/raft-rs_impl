@@ -262,7 +262,7 @@ impl Node {
 
             // for the node_id
             let _ = self.append_log_entry(LogEntry::Heartbeat {
-                term: term,
+                term,
                 peer_id: from_peer.id.clone(),
             });
 
