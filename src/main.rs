@@ -18,7 +18,7 @@ use std::collections::BTreeMap;
 mod raft;
 
 fn main() {
-    // Initialize logger
+    // New logger other than tracing subscriber
     TermLogger::init(
         LevelFilter::Info,
         Config::default(),
@@ -27,7 +27,7 @@ fn main() {
     )
     .unwrap();
 
-    // Define our cluster configuration
+    // cluster config hardcoded
     let mut rng = rand::thread_rng();
     let node_configs = [
         (1, rng.gen_range(1..10)),
@@ -39,14 +39,14 @@ fn main() {
         (7, rng.gen_range(1..10)),
     ];
 
-    // Create socket addresses for each node
+    // generate address for every node
     let node_addresses: Vec<SocketAddrV4> = node_configs
         .iter()
         .enumerate()
         .map(|(i, _)| SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 55000 + i as u16))
         .collect();
 
-    // Create peer information
+    // create peers for every node for connection communication
     let peers: Vec<Vec<Peer>> = node_addresses
         .iter()
         .enumerate()
@@ -81,19 +81,18 @@ fn main() {
         node_secret_shares.insert((i + 1) as u16, share.clone());
     }
 
-    // Create and start all nodes
     let mut nodes = Vec::new();
     let mut networks = Vec::new();
 
     for (i, (node_id, timeout_secs)) in node_configs.iter().enumerate() {
-        // Create node config
+        // my config see types.rs
         let config = NodeConfig {
             id: *node_id,
             election_timeout: Duration::from_secs(*timeout_secs as u64),
             heartbeat_interval: Duration::from_millis(1000),
         };
 
-        // Create node and network
+        // create node and network
         let mut node = Node::new(config, node_addresses[i], peers[i].clone());
         let network = Network::new(node_addresses[i]);
 
@@ -101,7 +100,7 @@ fn main() {
         let secret_share = node_secret_shares.get(&(i as u16 + 1)).cloned();
         node.set_frost_key(secret_share);
 
-        // Start the node
+        // Start
         node.start();
 
         nodes.push(node);
@@ -109,6 +108,7 @@ fn main() {
     }
 
     // Test FROST signature verification
+    // need in bytes don't know why
     let message = b"Test message for distributed signing";
 
     // Generate nonces and commitments for each participating node
