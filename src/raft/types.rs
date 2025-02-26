@@ -18,7 +18,7 @@ pub enum LogEntry {
         term: u64,
         peer_id: String,
     },
-    LeaderEntry {
+    HeartbeatLeaderEntry {
         term: u64,
         peer_id: String,
         leader: bool,
