@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 use raft::network::Network;
 use raft::node::Node;
 use raft::types::{NodeConfig, Peer};
+use rand::Rng;
 use simplelog::{ColorChoice, Config, LevelFilter, TermLogger, TerminalMode};
 
 mod raft;
@@ -21,8 +22,18 @@ fn main() {
     )
     .unwrap();
 
+    let mut rng = rand::rng();
+
     // Define our cluster configuration
-    let node_configs = [(1, 5), (2, 3), (3, 6), (4, 4), (5, 7), (6, 2), (7, 5)];
+    let node_configs = [
+        (1, rng.random_range(1..10)),
+        (2, rng.random_range(1..10)),
+        (3, rng.random_range(1..10)),
+        (4, rng.random_range(1..10)),
+        (5, rng.random_range(1..10)),
+        (6, rng.random_range(1..10)),
+        (7, rng.random_range(1..10)),
+    ];
 
     // Create socket addresses for each node
     let node_addresses: Vec<SocketAddrV4> = node_configs

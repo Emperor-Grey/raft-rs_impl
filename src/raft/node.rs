@@ -86,6 +86,13 @@ impl Node {
                     now.duration_since(time) >= self.config.heartbeat_interval
                 }) {
                     self.last_heartbeat = Some(now);
+
+                    // Log leader's heartbeat
+                    let _ = self.append_log_entry(LogEntry::Heartbeat {
+                        term: self.server.term,
+                        peer_id: self.server.id.clone(),
+                    });
+
                     messages.push(Message::Heartbeat {
                         term: self.server.term,
                         leader_id: self.config.id,
