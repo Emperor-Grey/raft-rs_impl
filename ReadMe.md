@@ -61,4 +61,4 @@ This project uses `simplelog` for structured logging. You can configure logging 
 
 ## Reference
 
-This project has taken reference from [`rsraft`](https://github.com/laurocaetano/rsraft) but extends it with FROST for cryptographic security.
+This project has taken reference from [`rsraft`](https://github.com/laurocaetano/rsraft) but extends it with FROST for cryptographic security and simplifies the implementation of raft.
