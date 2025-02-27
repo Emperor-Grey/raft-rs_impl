@@ -1,3 +1,12 @@
-{"HeartbeatLeaderEntry":{"term":1,"peer_id":"server_4","leader":true}}
-{"HeartbeatLeaderEntry":{"term":1,"peer_id":"server_4","leader":true}}
-{"HeartbeatLeaderEntry":{"term":1,"peer_id":"server_4","leader":true}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
+{"Heartbeat":{"term":1,"peer_id":"server_6"}}
