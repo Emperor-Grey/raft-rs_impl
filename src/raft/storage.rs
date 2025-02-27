@@ -1,13 +1,13 @@
 use log::info;
 use std::fs::{self, File, OpenOptions};
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 use crate::raft::types::LogEntry;
 
 pub struct Storage {
-    log_dir: PathBuf,
-    node_id: u64,
+    _log_dir: PathBuf,
+    _node_id: u64,
     current_file: File,
 }
 
@@ -29,8 +29,8 @@ impl Storage {
             .open(&log_file)?;
 
         Ok(Storage {
-            log_dir,
-            node_id,
+            _log_dir: log_dir,
+            _node_id: node_id,
             current_file,
         })
     }
@@ -42,30 +42,30 @@ impl Storage {
         Ok(())
     }
 
-    pub fn read_all_entries(&self) -> io::Result<Vec<LogEntry>> {
-        let file = File::open(self.log_dir.join(format!("node_{}.log", self.node_id)))?;
-        let reader = BufReader::new(file);
-        let mut entries = Vec::new();
+    // pub fn read_all_entries(&self) -> io::Result<Vec<LogEntry>> {
+    //     let file = File::open(self.log_dir.join(format!("node_{}.log", self.node_id)))?;
+    //     let reader = BufReader::new(file);
+    //     let mut entries = Vec::new();
 
-        for line in reader.lines() {
-            let line = line?;
-            if let Ok(entry) = serde_json::from_str::<LogEntry>(&line) {
-                entries.push(entry);
-            }
-        }
+    //     for line in reader.lines() {
+    //         let line = line?;
+    //         if let Ok(entry) = serde_json::from_str::<LogEntry>(&line) {
+    //             entries.push(entry);
+    //         }
+    //     }
 
-        Ok(entries)
-    }
+    //     Ok(entries)
+    // }
 
-    pub fn clear(&mut self) -> io::Result<()> {
-        // Truncate the file
-        self.current_file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .truncate(true)
-            .open(self.log_dir.join(format!("node_{}.log", self.node_id)))?;
-        Ok(())
-    }
+    // pub fn clear(&mut self) -> io::Result<()> {
+    //     // Truncate the file
+    //     self.current_file = OpenOptions::new()
+    //         .create(true)
+    //         .write(true)
+    //         .truncate(true)
+    //         .open(self.log_dir.join(format!("node_{}.log", self.node_id)))?;
+    //     Ok(())
+    // }
 }
 
 impl Drop for Storage {

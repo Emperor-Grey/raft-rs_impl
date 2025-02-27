@@ -1,11 +1,9 @@
-#![allow(unused)]
-
 use std::net::{Ipv4Addr, SocketAddrV4};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use frost_ed25519::keys::SecretShare;
-use frost_ed25519::{self as frost, Identifier};
+use frost_ed25519::{self as frost};
 use log::info;
 use raft::network::Network;
 use raft::node::Node;
@@ -140,7 +138,7 @@ fn main() {
     for (identifier, nonces) in nonces_map.iter() {
         // Create a mapping from identifier to node index
         // We'll use the fact that you created identifiers as i + 1 earlier
-        for (node_idx, node) in nodes.iter().enumerate() {
+        for (_node_idx, node) in nodes.iter().enumerate() {
             // Check if this node has the FROST key with matching identifier
             if let Some(key_share) = &node.frost_key {
                 let key_package = frost::keys::KeyPackage::try_from(key_share.clone())
@@ -176,7 +174,7 @@ fn main() {
     // Main event loop
     let mut last_tick = Instant::now();
     let tick_interval = Duration::from_millis(500); // Check state every 500ms
-    let mut retry_count = 0;
+    let mut _retry_count = 0;
     const MAX_RETRIES: u32 = 3;
 
     loop {
@@ -191,8 +189,8 @@ fn main() {
                 while let Some((message, from_peer)) = networks[i].receive() {
                     match node.handle_message(message, &from_peer) {
                         Some(response) => {
-                            retry_count = 0;
-                            while retry_count < MAX_RETRIES {
+                            _retry_count = 0;
+                            while _retry_count < MAX_RETRIES {
                                 let peer_to_respond = Peer {
                                     id: from_peer.id.clone(),
                                     address: from_peer.address,
@@ -201,7 +199,7 @@ fn main() {
                                 break;
                             }
                         }
-                        None => retry_count = 0,
+                        None => _retry_count = 0,
                     }
                 }
 

@@ -321,7 +321,7 @@ impl Node {
 
     pub fn sign_message(
         &self,
-        message: &[u8],
+        _message: &[u8],
         nonces: frost::round1::SigningNonces,
         signing_package: &frost::SigningPackage,
     ) -> Result<frost::round2::SignatureShare, frost::Error> {
